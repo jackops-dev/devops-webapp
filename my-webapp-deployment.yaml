@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: my-webapp
+  name: my-webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-webapp
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: my-webapp
+    spec:
+      containers:
+      - image: my-webapp
+        name: my-webapp
+        imagePullPolicy: IfNotPresent
+        resources: {}
+status: {}
