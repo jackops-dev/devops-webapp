@@ -1,31 +1,30 @@
-# DevOps Webapp 🚀
+# DevOps Web App 🚀
 
-This project is a hands-on learning project to understand modern backend development and DevOps workflows.
+This project is a simple Node.js web application built with Express, containerized with Docker and deployed to a local Kubernetes cluster using k3d.
 
-## Features
-
-- Express.js backend
-- REST API with:
-  - `GET /`
-  - `GET /users`
-- JSON responses
-- Automated testing with Jest & Supertest
-- Dockerized application
-- Kubernetes deployment using k3d
-
-## Tech Stack
+## 🔧 Tech Stack
 
 - Node.js
 - Express
 - Docker
 - Kubernetes (k3d)
-- Jest
-- Supertest
-- Git
-- GitHub
+- Jest (Testing)
+- Supertest (API Testing)
 
-## Run locally
+---
+
+## 📦 Features
+
+- REST API with Express
+- Endpoint `/` → returns a welcome message
+- Endpoint `/users` → returns a JSON list of users
+- Automated tests for:
+  - Successful requests
+  - Error handling (404)
+
+---
+
+## 🧪 Run Tests
 
 ```bash
-npm install
-node index.js
+npx jest
