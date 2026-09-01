@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # DevOps Web App 🚀
 
 This project is a simple Node.js web application built with Express, containerized with Docker and deployed to a local Kubernetes cluster using k3d.
@@ -28,3 +29,7 @@ This project is a simple Node.js web application built with Express, containeriz
 
 ```bash
 npx jest
+=======
+# DevOps Automation Lab
+Lernprojekt mit Docker, PostgreSQL, nginx und Node.js.
+>>>>>>> 438b7c8 (ADD README content)
