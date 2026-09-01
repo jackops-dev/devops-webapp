@@ -250,5 +250,5 @@ const server = http.createServer(async (req, res) => {
 });
  
 server.listen(3000, '0.0.0.0', () => {
-  console.log('Backend läuft auf Port 3000');
+  console.log('Backend läuft erfolgreich auf Port 3000');
 });
