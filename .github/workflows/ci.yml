@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_USER: devuser
+      DB_PASSWORD: devpass
+      DB_NAME: devdb
+      DB_PORT: 5432
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose config
+
+      - name: Start Docker Compose stack
+        run: docker compose up -d --build
+
+      - name: Wait for application
+        run: |
+          for i in {1..15}; do
+            if python3 scripts/check_services.py; then
+              exit 0
+            fi
+
+            echo "Application not ready yet..."
+            sleep 3
+          done
+
+          echo "Application failed to become ready"
+          docker compose ps
+          docker compose logs
+          exit 1
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible-core
+
+      - name: Validate Ansible playbook
+        run: |
+          ansible-playbook \
+            -i ansible/inventory.ini \
+            ansible/playbook.yml \
+            --syntax-check
+
+      - name: Show container status
+        if: always()
+        run: docker compose ps
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
+
