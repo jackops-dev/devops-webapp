@@ -125,9 +125,9 @@ ansible-playbook \
 
 ## CI/CD with GitHub Actions
 
-This project uses GitHub Actions to automate validation of the application and deployment workflow.
+This project uses GitHub Actions to automatically validate the application on every push and pull request to the `main` branch.
 
-The CI/CD pipeline is designed around the existing Docker Compose stack, Python health check and Ansible automation.
+The current CI pipeline has been successfully tested on a fresh GitHub-hosted Ubuntu runner.
 
 ### Pipeline Flow
 
@@ -135,48 +135,78 @@ The CI/CD pipeline is designed around the existing Docker Compose stack, Python 
 Git Push / Pull Request
         |
         v
-GitHub Actions Runner
+Checkout repository
         |
         v
-Validate project files
+Validate Docker Compose configuration
         |
         v
-Start Docker Compose stack
+Build and start Docker Compose stack
+        |
+        v
+Initialize PostgreSQL database
         |
         v
 Run Python health check
         |
         v
-Run Ansible deployment validation
+Validate Ansible playbook syntax
         |
         v
-Pipeline succeeds only if all checks pass
+CI pipeline succeeds
 ```
 
 ### Automated Checks
 
-The pipeline is designed to:
+The workflow performs the following steps:
 
-- check out the repository
-- validate the Docker Compose configuration
-- start the application stack with Docker Compose
-- execute the Python service health check
-- verify that the backend and customer API are reachable
-- validate the Ansible playbook syntax
+- checks out the repository
+- validates the Docker Compose configuration
+- builds and starts the complete Docker Compose stack
+- initializes the PostgreSQL database using `db/init.sql`
+- waits for the application to become available
+- runs the Python health check
+- verifies that the backend health endpoint and customer API are reachable
+- installs Ansible on the GitHub Actions runner
+- validates the Ansible playbook with `--syntax-check`
+- prints container status information
+- prints Docker Compose logs automatically if the workflow fails
 
 ### Health Check Integration
 
-The same health check used locally can also be executed inside the CI pipeline:
+The CI pipeline uses the same Python health check that can be executed locally:
 
 ```bash
 python3 scripts/check_services.py
 ```
 
-If one of the required services cannot be reached, the script returns a non-zero exit code and the pipeline fails automatically.
+A successful run verifies:
+
+```text
+[OK] Backend Health erreichbar
+[OK] Kunden API erreichbar
+[GESAMT] Alle Services erreichbar
+```
+
+The script returns exit code `0` when all required services are reachable.
+
+If one of the checks fails, the script returns a non-zero exit code and the GitHub Actions workflow fails automatically.
+
+### Database Initialization
+
+GitHub Actions starts the application in a fresh environment without any existing Docker volumes.
+
+The PostgreSQL container therefore initializes the required database schema automatically from:
+
+```text
+db/init.sql
+```
+
+This ensures that the application can be started reproducibly on a clean system instead of depending on an existing local database volume.
 
 ### Ansible Validation
 
-The Ansible configuration can be validated in CI with:
+The workflow validates the Ansible playbook with:
 
 ```bash
 ansible-playbook \
@@ -185,17 +215,17 @@ ansible-playbook \
   --syntax-check
 ```
 
-This helps detect invalid YAML or Ansible configuration before deployment.
+This detects invalid YAML or Ansible configuration before changes are considered successful.
 
-### GitHub Actions Workflow
+### Workflow Configuration
 
-The workflow configuration will be stored in:
+The GitHub Actions workflow is stored in:
 
 ```text
 .github/workflows/ci.yml
 ```
 
-The goal of the pipeline is to make every change reproducible and automatically verify that the application can still be started and reached successfully.
+The pipeline has successfully completed on a clean GitHub-hosted runner, confirming that the Docker Compose stack, database initialization, Python health check and Ansible configuration work together in an automated environment.
 
 ## Current Focus
 
