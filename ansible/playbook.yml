@@ -1,0 +1,39 @@
+- name: DevOps Lab Deployment
+  hosts: local
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Stelle sicher, dass Docker läuft
+      ansible.builtin.service:
+        name: docker
+        state: started
+      become: true
+
+    - name: Prüfe ob Projektordner existiert
+      ansible.builtin.stat:
+        path: /home/jack87/devops-lab/compose-demo
+      register: project_dir
+
+    - name: Breche ab, wenn Projektordner fehlt
+      ansible.builtin.fail:
+        msg: "Projektordner wurde nicht gefunden"
+      when: not project_dir.stat.exists
+
+    - name: Starte Docker Compose Stack
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: /home/jack87/devops-lab/compose-demo
+      register: compose_result
+      changed_when: false
+
+    - name: Prüfe Services mit Python Healthcheck
+      ansible.builtin.command:
+        cmd: python3 scripts/check_services.py
+        chdir: /home/jack87/devops-lab/compose-demo
+      register: healthcheck_result
+      changed_when: false
+
+    - name: Zeige Healthcheck Ausgabe
+      ansible.builtin.debug:
+        msg: "{{ healthcheck_result.stdout_lines }}"
